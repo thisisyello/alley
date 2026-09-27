@@ -11,6 +11,9 @@
     "db:generate": "pnpm --filter api db:generate",
     "db:init": "pnpm --filter api db:init",
     "db:push": "pnpm --filter api db:push",
+    "db:import": "pnpm --filter api db:import",
+    "db:seed": "pnpm db:import",
+    "db:verify": "pnpm --filter api db:verify",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

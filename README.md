@@ -274,14 +274,18 @@ AI 액션 결과를 지도에 반영합니다.
 pnpm db:up
 pnpm db:init
 pnpm db:generate
+pnpm db:import
+pnpm db:verify
 ```
 
 복구용 PostgreSQL은 `localhost:55433`에서 실행되며 PostGIS, pgvector,
 pg_trgm 확장을 자동으로 활성화합니다. 기존 로컬 DB와 데이터 볼륨은 사용하지
 않습니다.
 
-> **주의**: 위 명령은 빈 스키마만 생성합니다. 실제 상권 데이터는 이후
-> `db:seed` 단계에서 별도로 적재합니다.
+`db:import`는 Git에서 제외된 `data/raw` 원본 파일을 스트리밍으로 읽어
+점포, 상권변화, 상가 위치, 최신 임대료 데이터를 적재합니다. CP949 CSV는
+적재 중 UTF-8로 변환하며 원본 파일은 수정하지 않습니다. `db:seed`는
+`db:import`의 별칭입니다.
 
 ### 2) 환경변수 설정
 

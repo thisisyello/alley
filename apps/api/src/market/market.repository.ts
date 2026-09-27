@@ -356,9 +356,8 @@ export class MarketRepository {
       : Prisma.empty;
 
     const result = await this.prisma.$queryRaw<any[]>`
-      SELECT *
+      SELECT seoul_commercial_store_info.*
       FROM seoul_commercial_store_info AS seoul_commercial_store_info
-      JOIN building_integrated_info b ON  seoul_commercial_store_info.lot_code = b.unique_no
       WHERE seoul_commercial_store_info.geom && ST_MakeEnvelope(
           ${minLng},
           ${minLat},
