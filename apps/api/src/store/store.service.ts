@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MarketRepository } from '../market/market.repository';
+import { Prisma } from '../../generated/prisma/client';
 import {
   GetStoreQueryDto,
   StoreLevel,
@@ -10,6 +11,7 @@ import {
   ModelConfig,
   StoreStatsRow,
   ClosureRateRankingRawRow,
+  StoreActivityRankingRawRow,
   StorePrismaDelegate,
   getStoreDelegate,
 } from './dto/store.dto';
@@ -262,6 +264,69 @@ export class StoreService {
     });
 
     return { level, quarter: currentQ, items };
+  }
+
+  async getStoreActivityRanking(
+    sortBy: 'count' | 'growth',
+    industryCode?: string,
+  ) {
+    const client = getStoreDelegate(this.prisma, 'storeCommercial');
+    const currentQ = await this.getLatestQuarter(client);
+    const prevQ = this.getPreviousQuarter(currentQ);
+    const industryFilter = industryCode
+      ? Prisma.sql`AND svc_induty_cd = ${industryCode}`
+      : Prisma.empty;
+    const orderBy =
+      sortBy === 'growth'
+        ? Prisma.sql`"growthRate" DESC, "currentStoreCount" DESC`
+        : Prisma.sql`"currentStoreCount" DESC`;
+
+    const rows = await this.prisma.$queryRaw<StoreActivityRankingRawRow[]>(
+      Prisma.sql`
+        WITH current_stats AS (
+          SELECT
+            trdar_cd AS code,
+            MAX(trdar_cd_nm) AS name,
+            SUM(stor_co) AS current_count
+          FROM store_commercial
+          WHERE stdr_yyqu_cd = ${currentQ} ${industryFilter}
+          GROUP BY trdar_cd
+        ),
+        previous_stats AS (
+          SELECT trdar_cd AS code, SUM(stor_co) AS previous_count
+          FROM store_commercial
+          WHERE stdr_yyqu_cd = ${prevQ} ${industryFilter}
+          GROUP BY trdar_cd
+        )
+        SELECT
+          current.code,
+          current.name,
+          current.current_count AS "currentStoreCount",
+          COALESCE(previous.previous_count, 0) AS "previousStoreCount",
+          CASE
+            WHEN COALESCE(previous.previous_count, 0) > 0 THEN
+              ((current.current_count - previous.previous_count)::float /
+                previous.previous_count::float) * 100
+            ELSE 0
+          END AS "growthRate"
+        FROM current_stats current
+        LEFT JOIN previous_stats previous ON current.code = previous.code
+        WHERE current.current_count > 0
+        ORDER BY ${orderBy}
+        LIMIT 20
+      `,
+    );
+
+    return {
+      quarter: currentQ,
+      items: rows.map((row) => ({
+        code: row.code,
+        name: row.name,
+        currentStoreCount: Number(row.currentStoreCount),
+        previousStoreCount: Number(row.previousStoreCount),
+        growthRate: Number(row.growthRate.toFixed(1)),
+      })),
+    };
   }
 
   private getPreviousQuarter(quarter: string): string {

@@ -7,6 +7,8 @@ import {
   StoreLocationsResponseDto,
   GetClosureRateRankingQueryDto,
   ClosureRateRankingResponseDto,
+  GetStoreActivityRankingQueryDto,
+  StoreActivityRankingResponseDto,
 } from './dto/store.dto';
 
 @Controller('store')
@@ -42,6 +44,16 @@ export class StoreController {
       'commercial',
       query.industryCode,
       query.keyword, // 키워드 전달
+    );
+  }
+
+  @Get('ranking/activity')
+  getStoreActivityRanking(
+    @Query() query: GetStoreActivityRankingQueryDto,
+  ): Promise<StoreActivityRankingResponseDto> {
+    return this.storeService.getStoreActivityRanking(
+      query.sortBy ?? 'count',
+      query.industryCode,
     );
   }
 }

@@ -4,26 +4,21 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
-  fetchLocationRanking,
-  LocationRankItem,
+  fetchStoreActivityRanking,
+  StoreActivityRankItem,
 } from '@/services/location/location.service';
 
 export function AverageSalesSection() {
-  const [data, setData] = useState<LocationRankItem[]>([]);
+  const [data, setData] = useState<StoreActivityRankItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // 평균 매출순 상위 5개
-        const result = await fetchLocationRanking(
-          'commercial',
-          undefined,
-          'average',
-        );
+        const result = await fetchStoreActivityRanking('count');
         setData(result.slice(0, 10));
       } catch (error) {
-        console.error('Failed to fetch average sales locations:', error);
+        console.error('Failed to fetch store count ranking:', error);
       } finally {
         setIsLoading(false);
       }
@@ -84,10 +79,10 @@ export function AverageSalesSection() {
     <section className="px-8 py-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-h3 font-heading text-foreground">
-          평균 매출 순 상권
+          점포가 많은 상권
         </h2>
         <Link
-          href="/locations/search?tab=평균 매출 순"
+          href="/locations/search?tab=폐업률 높은 순"
           className="flex items-center gap-1 text-body font-strong text-muted-foreground hover:text-foreground transition-colors"
         >
           더보기 <ArrowRight className="w-4 h-4" />
@@ -136,15 +131,15 @@ export function AverageSalesSection() {
                     <div className="flex justify-between items-end mt-4">
                       <div>
                         <span className="text-caption font-strong text-muted-foreground block">
-                          평균 매출
+                          현재 점포
                         </span>
                         <span className="text-h5 font-heading">
-                          {item.avgRevenue}
+                          {item.currentStoreCount.toLocaleString()}개
                         </span>
                       </div>
                       <div className="text-right">
                         <span className="text-caption font-strong text-muted-foreground block">
-                          성장률
+                          전분기 대비
                         </span>
                         <span className={`text-h5 font-heading text-primary`}>
                           {item.growthRate > 0 ? '+' : ''}

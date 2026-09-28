@@ -406,81 +406,93 @@ export function RecommendSection() {
             className="overflow-x-auto pt-2 pb-4 no-scrollbar scroll-smooth"
           >
             <div className="flex gap-5">
-              {isLoading || displayLocations.length === 0
-                ? Array.from({ length: 10 }).map((_, index) => (
-                    <div
-                      key={`loading-${index}`}
-                      className="w-96 shrink-0 rounded-2xl bg-background shadow-sm border border-border p-6 animate-pulse flex flex-col justify-between h-96"
-                    >
-                      <div className="space-y-3">
-                        <div className="h-5 w-16 rounded-full bg-muted" />
-                        <div className="h-5 w-40 rounded bg-muted" />
-                        <div className="h-4 w-24 rounded bg-muted" />
+              {isLoading ? (
+                Array.from({ length: 10 }).map((_, index) => (
+                  <div
+                    key={`loading-${index}`}
+                    className="w-96 shrink-0 rounded-2xl bg-background shadow-sm border border-border p-6 animate-pulse flex flex-col justify-between h-96"
+                  >
+                    <div className="space-y-3">
+                      <div className="h-5 w-16 rounded-full bg-muted" />
+                      <div className="h-5 w-40 rounded bg-muted" />
+                      <div className="h-4 w-24 rounded bg-muted" />
+                    </div>
+                    <div className="flex items-end justify-between gap-6">
+                      <div>
+                        <div className="mb-3 h-3 w-14 rounded bg-muted" />
+                        <div className="flex items-end gap-2">
+                          <div className="h-8 w-16 rounded bg-muted" />
+                          <div className="h-4 w-6 rounded bg-muted" />
+                        </div>
                       </div>
+                      <div className="h-40 w-40 rounded-full bg-muted" />
+                    </div>
+                  </div>
+                ))
+              ) : displayLocations.length === 0 ? (
+                <div className="w-full border border-border bg-muted/30 p-8 text-center">
+                  <h3 className="text-h5 font-heading text-foreground">
+                    맞춤 추천 데이터 준비 중
+                  </h3>
+                  <p className="mt-2 text-body text-muted-foreground">
+                    매출과 인구 데이터가 없어 현재는 점포 현황 기반 상권을
+                    아래에서 확인할 수 있습니다.
+                  </p>
+                </div>
+              ) : (
+                displayLocations.map((location) => {
+                  const badge = getScoreBadge(location.score);
+                  return (
+                    <Link
+                      key={location.id}
+                      href={location.href}
+                      className="w-96 shrink-0 rounded-2xl bg-background shadow-sm border border-border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between h-96"
+                    >
+                      <div className="space-y-1.5">
+                        <div
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-tiny font-heading text-white ${badge.badgeColor}`}
+                        >
+                          {badge.text}
+                        </div>
+                        <h3 className="mt-2 text-h4 font-heading text-foreground">
+                          {location.name}
+                        </h3>
+                        <p className="text-h5 font-strong text-muted-foreground">
+                          {location.region}
+                        </p>
+                      </div>
+
                       <div className="flex items-end justify-between gap-6">
                         <div>
-                          <div className="mb-3 h-3 w-14 rounded bg-muted" />
-                          <div className="flex items-end gap-2">
-                            <div className="h-8 w-16 rounded bg-muted" />
-                            <div className="h-4 w-6 rounded bg-muted" />
-                          </div>
-                        </div>
-                        <div className="h-40 w-40 rounded-full bg-muted" />
-                      </div>
-                    </div>
-                  ))
-                : displayLocations.map((location) => {
-                    const badge = getScoreBadge(location.score);
-                    return (
-                      <Link
-                        key={location.id}
-                        href={location.href}
-                        className="w-96 shrink-0 rounded-2xl bg-background shadow-sm border border-border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between h-96"
-                      >
-                        <div className="space-y-1.5">
-                          <div
-                            className={`inline-flex items-center rounded-full px-3 py-1 text-tiny font-heading text-white ${badge.badgeColor}`}
-                          >
-                            {badge.text}
-                          </div>
-                          <h3 className="mt-2 text-h4 font-heading text-foreground">
-                            {location.name}
-                          </h3>
-                          <p className="text-h5 font-strong text-muted-foreground">
-                            {location.region}
+                          <p className="text-caption font-strong text-muted-foreground mb-1">
+                            매칭 점수
                           </p>
-                        </div>
-
-                        <div className="flex items-end justify-between gap-6">
-                          <div>
-                            <p className="text-caption font-strong text-muted-foreground mb-1">
-                              매칭 점수
-                            </p>
-                            <div className="flex items-end gap-1">
-                              <span
-                                className={`text-h1 font-heading ${badge.textColor}`}
-                              >
-                                {formatScore(location.score)}
-                              </span>
-                              <span
-                                className={`text-h5 font-heading ${badge.textColor}`}
-                              >
-                                점
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="relative right-6">
-                            <PentagonChart
-                              metrics={location.metrics}
-                              size={200}
-                              color={badge.chartColor}
-                            />
+                          <div className="flex items-end gap-1">
+                            <span
+                              className={`text-h1 font-heading ${badge.textColor}`}
+                            >
+                              {formatScore(location.score)}
+                            </span>
+                            <span
+                              className={`text-h5 font-heading ${badge.textColor}`}
+                            >
+                              점
+                            </span>
                           </div>
                         </div>
-                      </Link>
-                    );
-                  })}
+
+                        <div className="relative right-6">
+                          <PentagonChart
+                            metrics={location.metrics}
+                            size={200}
+                            color={badge.chartColor}
+                          />
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
             </div>
           </div>
 

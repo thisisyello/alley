@@ -145,6 +145,30 @@ export class ClosureRateRankingResponseDto {
   items: ClosureRateRankingItemDto[];
 }
 
+export class GetStoreActivityRankingQueryDto {
+  @IsString()
+  @IsOptional()
+  @IsIn(['count', 'growth'])
+  sortBy?: 'count' | 'growth';
+
+  @IsString()
+  @IsOptional()
+  industryCode?: string;
+}
+
+export class StoreActivityRankingItemDto {
+  code: string;
+  name: string;
+  currentStoreCount: number;
+  previousStoreCount: number;
+  growthRate: number;
+}
+
+export class StoreActivityRankingResponseDto {
+  quarter: string;
+  items: StoreActivityRankingItemDto[];
+}
+
 // ============================================
 // 내부 서비스 타입 (Prisma 관련)
 // ============================================
@@ -183,6 +207,14 @@ export interface ClosureRateRankingRawRow {
   previousStoreCount: bigint | number;
   closedStoreCount: bigint | number;
   closureRate: number;
+}
+
+export interface StoreActivityRankingRawRow {
+  code: string;
+  name: string;
+  currentStoreCount: bigint | number;
+  previousStoreCount: bigint | number;
+  growthRate: number;
 }
 
 /**

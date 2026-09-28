@@ -4,22 +4,18 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
-  fetchLocationRanking,
-  LocationRankItem,
+  fetchStoreActivityRanking,
+  StoreActivityRankItem,
 } from '@/services/location/location.service';
 
 export function TrendingSection() {
-  const [data, setData] = useState<LocationRankItem[]>([]);
+  const [data, setData] = useState<StoreActivityRankItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const result = await fetchLocationRanking(
-          'commercial',
-          undefined,
-          'growth',
-        );
+        const result = await fetchStoreActivityRanking('growth');
         setData(result.slice(0, 10));
       } catch (error) {
         console.error('Failed to fetch trending locations:', error);
@@ -83,10 +79,10 @@ export function TrendingSection() {
     <section className="px-8 py-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-h3 font-heading text-foreground">
-          급상승 중인 신흥 트렌드 상권
+          점포가 증가한 상권
         </h2>
         <Link
-          href="/locations/search?tab=매출 성장 순"
+          href="/locations/search?tab=폐업률 높은 순"
           className="flex items-center gap-1 text-body font-strong text-muted-foreground hover:text-foreground transition-colors"
         >
           더보기 <ArrowRight className="w-4 h-4" />
@@ -135,18 +131,19 @@ export function TrendingSection() {
                     <div className="flex justify-between items-end mt-4">
                       <div>
                         <span className="text-caption font-strong text-muted-foreground block">
-                          평균 매출
+                          현재 점포
                         </span>
                         <span className="text-h5 font-heading">
-                          {item.avgRevenue}
+                          {item.currentStoreCount.toLocaleString()}개
                         </span>
                       </div>
                       <div className="text-right">
                         <span className="text-caption font-strong text-muted-foreground block">
-                          성장률
+                          증가율
                         </span>
                         <span className="text-h5 font-heading text-primary">
-                          +{item.growthRate.toFixed(1)}%
+                          {item.growthRate > 0 ? '+' : ''}
+                          {item.growthRate.toFixed(1)}%
                         </span>
                       </div>
                     </div>

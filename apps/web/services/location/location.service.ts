@@ -34,6 +34,32 @@ export interface AverageSalesRankingResponse {
   items: AverageSalesRankingItem[];
 }
 
+export interface StoreActivityRankItem {
+  code: string;
+  name: string;
+  currentStoreCount: number;
+  previousStoreCount: number;
+  growthRate: number;
+}
+
+export const fetchStoreActivityRanking = async (
+  sortBy: 'count' | 'growth',
+): Promise<StoreActivityRankItem[]> => {
+  const params = new URLSearchParams({ sortBy });
+  const response = await fetch(
+    `${API_URL}/store/ranking/activity?${params.toString()}`,
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch store activity ranking');
+  }
+
+  const data = (await response.json()) as {
+    items: StoreActivityRankItem[];
+  };
+  return data.items;
+};
+
 // 대분류 업종
 export interface IndustryCategory {
   code: string;
@@ -352,7 +378,7 @@ export const fetchClosureRateRanking = async (
     // 상태 결정
     let status = '정체 상권';
     let statusType: 'stable' | 'danger' | 'hot' | 'variable' = 'variable';
-    
+
     if (item.closureRate < 3) {
       status = '안정 상권';
       statusType = 'stable';
